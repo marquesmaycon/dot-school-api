@@ -3,18 +3,15 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import { CourseFactory } from '#database/factories/course_factory'
 import { ThemeFactory } from '#database/factories/theme_factory'
 import { UserFactory } from '#database/factories/user_factory'
-import { ClassStatus } from '#enums/class_status'
+
+// TO DO => alterar o seeder para atender aos criterios do pdf. Exemplo: um aluno nao pode estar em 2 turmas do mesmo curso
 
 export default class extends BaseSeeder {
   async run() {
     const users = await UserFactory.createMany(100)
     const themes = await ThemeFactory.createMany(15)
     const courses = await CourseFactory.with('classes', 2)
-      .with('classes', 1, (builder) =>
-        builder.tap((klass) => {
-          klass.status = ClassStatus.FINISHED
-        })
-      )
+      .with('classes', 1, (builder) => builder.apply('done'))
       .createMany(5)
 
     await Promise.all(
@@ -28,6 +25,7 @@ export default class extends BaseSeeder {
     )
 
     const classes = courses.flatMap((course) => course.classes)
+
     await Promise.all(
       classes.map(async (klass) => {
         const randomUsers = users
