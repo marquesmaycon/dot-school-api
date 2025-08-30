@@ -45,8 +45,6 @@ test.group('Courses', (group) => {
     const course = await CourseFactory.with('themes', 1).create()
     await course.load('themes')
 
-    console.log(course)
-
     const payload = {
       ...course.serialize(),
       themes: [course.themes[0].id],
@@ -55,7 +53,6 @@ test.group('Courses', (group) => {
 
     const response = await client.put(`/courses/${course.id}`).json(payload)
 
-    console.log(response.body())
     response.assertStatus(200)
     response.assertBodyContains({ description: payload.description })
   })

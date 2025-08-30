@@ -21,9 +21,6 @@ export const createUserValidator = vine.compile(
 export const updateUserValidator = vine.compile(
   vine.object({
     name: vine.string().minLength(3).maxLength(255),
-    email: vine.string().email().maxLength(255).unique({
-      table: 'users',
-      column: 'email',
-    }),
+    email: vine.string().email().maxLength(255),
   })
 )

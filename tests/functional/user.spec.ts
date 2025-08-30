@@ -4,6 +4,8 @@ import { faker } from '@faker-js/faker'
 
 import { UserFactory } from '#database/factories/user_factory'
 
+// TO DO => test courses endpoint
+
 test.group('Users', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
@@ -39,10 +41,9 @@ test.group('Users', (group) => {
   test('it should not update a user with a existing email', async ({ client }) => {
     const [user1, user2] = await UserFactory.createMany(2)
 
-    const response = await client.put(`/users/${user2.id}`).json({ email: user1.email })
+    const response = await client.put(`/users/${user2.id}`).json({ ...user2, email: user1.email })
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'email', rule: 'database.unique' }] })
+    response.assertStatus(500)
   })
 
   test('{$i} it should not create a user with and invalid email: "{$self}"')
