@@ -3,12 +3,19 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import { CourseFactory } from '#database/factories/course_factory'
 import { ThemeFactory } from '#database/factories/theme_factory'
 import { UserFactory } from '#database/factories/user_factory'
+import { ClassStatus } from '#enums/class_status'
 
 export default class extends BaseSeeder {
   async run() {
     const users = await UserFactory.createMany(100)
     const themes = await ThemeFactory.createMany(15)
-    const courses = await CourseFactory.with('classes', 3).createMany(5)
+    const courses = await CourseFactory.with('classes', 2)
+      .with('classes', 1, (builder) =>
+        builder.tap((klass) => {
+          klass.status = ClassStatus.FINISHED
+        })
+      )
+      .createMany(5)
 
     await Promise.all(
       courses.map(async (course) => {
