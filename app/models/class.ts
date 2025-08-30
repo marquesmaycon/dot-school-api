@@ -30,7 +30,7 @@ export default class Class extends BaseModel {
   declare endDate: DateTime
 
   @column()
-  declare courseId: string
+  declare courseId: number
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

@@ -11,7 +11,7 @@ export default class extends BaseSchema {
 
       table.string('title').notNullable()
       table.string('description').notNullable()
-      table.integer('vacancies').notNullable()
+      table.integer('vacancies').notNullable().unsigned()
       table
         .enum('status', Object.values(ClassStatus))
         .notNullable()
