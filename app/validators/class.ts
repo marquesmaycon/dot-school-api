@@ -1,6 +1,7 @@
 import vine from '@vinejs/vine'
-import { ClassStatus } from '../enums/class_status.js'
 import { DateTime } from 'luxon'
+
+import { ClassStatus } from '#enums/class_status'
 
 /**
  * Validator to validate the payload when creating

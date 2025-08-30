@@ -1,5 +1,6 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { ClassStatus } from '../../app/enums/class_status.js'
+
+import { ClassStatus } from '#enums/class_status'
 
 export default class extends BaseSchema {
   protected tableName = 'classes'

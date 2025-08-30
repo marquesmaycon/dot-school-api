@@ -2,9 +2,10 @@ import { BaseModel, belongsTo, column, manyToMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 
+import { ClassStatus } from '#enums/class_status'
+
 import Course from './course.js'
 import User from './user.js'
-import type { ClassStatus } from '../enums/class_status.js'
 
 export default class Class extends BaseModel {
   @column({ isPrimary: true })
