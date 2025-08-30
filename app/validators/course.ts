@@ -11,10 +11,10 @@ export const createCourseValidator = vine.compile(
       column: 'title',
     }),
     description: vine.string().minLength(10).maxLength(255),
-    imgUrl: vine.string().minLength(1),
+    imgUrl: vine.string().url(),
     themes: vine
       .array(
-        vine.string().exists({
+        vine.number().exists({
           table: 'themes',
           column: 'id',
         })
