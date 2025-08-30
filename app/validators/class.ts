@@ -9,10 +9,7 @@ import { ClassStatus } from '#enums/class_status'
  */
 export const createClassValidator = vine.compile(
   vine.object({
-    title: vine.string().minLength(3).maxLength(255).unique({
-      table: 'classes',
-      column: 'title',
-    }),
+    title: vine.string().minLength(3).maxLength(255),
     description: vine.string().minLength(10).maxLength(255),
     vacancies: vine.number().min(0),
     startDate: vine.date().transform((v) => DateTime.fromJSDate(v)),
@@ -28,18 +25,7 @@ export const createClassValidator = vine.compile(
 export const updateClassValidator = vine.compile(
   vine.object({
     id: vine.number(),
-    title: vine
-      .string()
-      .minLength(3)
-      .maxLength(255)
-      .unique(async (db, value, field) => {
-        const row = await db
-          .from('classes')
-          .where('title', value)
-          .andWhereNot('id', field.parent.id)
-          .first()
-        return row === null
-      }),
+    title: vine.string().minLength(3).maxLength(255),
     description: vine.string().minLength(10).maxLength(255),
     vacancies: vine.number().min(0),
     status: vine.enum(ClassStatus),

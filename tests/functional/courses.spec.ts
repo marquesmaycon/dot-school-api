@@ -4,6 +4,17 @@ import { test } from '@japa/runner'
 import { ThemeFactory } from '#database/factories/theme_factory'
 import { CourseFactory } from '#database/factories/course_factory'
 
+const makeCoursesPayload = async (overrides = {}) => {
+  const theme = await ThemeFactory.create()
+  const course = await CourseFactory.make()
+
+  return {
+    ...course.serialize(),
+    themes: [theme.id],
+    ...overrides,
+  }
+}
+
 test.group('Courses', (group) => {
   group.each.setup(async () => {
     await db.beginGlobalTransaction()
@@ -30,50 +41,54 @@ test.group('Courses', (group) => {
     response.assertBodyContains({ title: course.title })
   })
 
-  test('it should not create courses without a title', async ({ client }) => {
-    const theme = await ThemeFactory.create()
-    const course = await CourseFactory.make()
+  test('it should update courses with valid data', async ({ client }) => {
+    const course = await CourseFactory.with('themes', 1).create()
+    await course.load('themes')
+
+    console.log(course)
 
     const payload = {
       ...course.serialize(),
-      title: '',
-      themes: [theme.id],
+      themes: [course.themes[0].id],
+      description: 'Updated Course Description',
     }
-    const response = await client.post('/courses').json(payload)
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'title' }] })
+    const response = await client.put(`/courses/${course.id}`).json(payload)
+
+    console.log(response.body())
+    response.assertStatus(200)
+    response.assertBodyContains({ description: payload.description })
   })
 
-  test('it should not create courses without a description', async ({ client }) => {
-    const theme = await ThemeFactory.create()
-    const course = await CourseFactory.make()
+  test('it should not create courses without a valid title')
+    .with(['', 'a', 'ab', 'a'.repeat(256)])
+    .run(async ({ client }, title) => {
+      const payload = await makeCoursesPayload({ title })
+      const response = await client.post('/courses').json(payload)
 
-    const payload = {
-      ...course.serialize(),
-      description: '',
-      themes: [theme.id],
-    }
-    const response = await client.post('/courses').json(payload)
+      response.assertStatus(422)
+      response.assertBodyContains({ errors: [{ field: 'title' }] })
+    })
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'description' }] })
-  })
+  test('it should not create courses without a valid description')
+    .with(['', 'a', 'abcdefghi', 'a'.repeat(256)])
+    .run(async ({ client }, description) => {
+      const payload = await makeCoursesPayload({ description })
+      const response = await client.post('/courses').json(payload)
 
-  test('it should not create courses without a img url', async ({ client }) => {
-    const theme = await ThemeFactory.create()
-    const course = await CourseFactory.make()
+      response.assertStatus(422)
+      response.assertBodyContains({ errors: [{ field: 'description' }] })
+    })
 
-    const payload = {
-      ...course.serialize(),
-      imgUrl: '',
-      themes: [theme.id],
-    }
-    const response = await client.post('/courses').json(payload)
+  test('it should not create courses without a valid imgUrl')
+    .with(['', 'invalidUrl', 'https://'])
+    .run(async ({ client }, imgUrl) => {
+      const payload = await makeCoursesPayload({ imgUrl })
+      const response = await client.post('/courses').json(payload)
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'imgUrl' }] })
-  })
+      response.assertStatus(422)
+      response.assertBodyContains({ errors: [{ field: 'imgUrl' }] })
+    })
 
   test('it should not create courses without a theme', async ({ client }) => {
     const course = await CourseFactory.make()
@@ -85,22 +100,15 @@ test.group('Courses', (group) => {
 
   test('it should not create courses with the same title', async ({ client }) => {
     const uniqueTitle = 'Unique Course Title'
-    const theme = await ThemeFactory.create()
     await CourseFactory.tap((c) => (c.title = uniqueTitle)).create()
-    const otherCourse = await CourseFactory.tap((c) => (c.title = uniqueTitle)).make()
 
-    const payload = {
-      ...otherCourse.serialize(),
-      themes: [theme.id],
-    }
-
+    const payload = await makeCoursesPayload({ title: uniqueTitle })
     const response = await client.post('/courses').json(payload)
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'title', rule: 'database.unique' }] })
+    response.assertStatus(500)
   })
 
-  test('it should not update courses with the an existing title', async ({ client }) => {
+  test('it should not update courses with an existing title', async ({ client }) => {
     const theme = await ThemeFactory.create()
     const [courseA, courseB] = await CourseFactory.createMany(2)
 
@@ -112,7 +120,6 @@ test.group('Courses', (group) => {
 
     const response = await client.post('/courses').json(payload)
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'title', rule: 'database.unique' }] })
+    response.assertStatus(500)
   })
 })

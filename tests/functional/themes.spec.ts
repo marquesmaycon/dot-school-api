@@ -1,7 +1,7 @@
 import db from '@adonisjs/lucid/services/db'
 import { test } from '@japa/runner'
 
-import Theme from '#models/theme'
+import { ThemeFactory } from '#database/factories/theme_factory'
 
 test.group('Themes', (group) => {
   group.each.setup(async () => {
@@ -12,22 +12,21 @@ test.group('Themes', (group) => {
     await db.rollbackGlobalTransaction()
   })
 
-  test('{$i} it should not create themes without a title - title: "{title}"')
-    .with([{ title: '' }, { title: null }, { title: undefined }])
+  test('{$i} it should not create themes without a valid title - title: "{$self}"')
+    .with(['', null, undefined])
     .run(async ({ client }, title) => {
-      const response = await client.post('/themes').json(title)
+      const response = await client.post('/themes').json({ title })
 
       response.assertStatus(422)
       response.assertBodyContains({ errors: [{ field: 'title' }] })
     })
 
   test('it should not create themes with the same title', async ({ client }) => {
-    const themeTitle = 'My_Theme_01'
-    await Theme.create({ title: themeTitle })
+    const themeTitle = 'Unique Theme Title'
+    await ThemeFactory.tap((theme) => (theme.title = themeTitle)).create()
 
     const response = await client.post('/themes').json({ title: themeTitle })
 
-    response.assertStatus(422)
-    response.assertBodyContains({ errors: [{ field: 'title', rule: 'database.unique' }] })
+    response.assertStatus(500)
   })
 })

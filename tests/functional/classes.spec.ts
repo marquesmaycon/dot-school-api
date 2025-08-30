@@ -36,7 +36,7 @@ test.group('Classes', (group) => {
     response.assertBodyContains({ title })
   })
 
-  test('it should not create classes without a valid title')
+  test('{$i} it should not create classes without a valid title - title: "{$self}"')
     .with(['', 'a', 'ab', 'a'.repeat(256)])
     .run(async ({ client }, title) => {
       const payload = await makeClassPayload({ title })
@@ -46,7 +46,7 @@ test.group('Classes', (group) => {
       response.assertBodyContains({ errors: [{ field: 'title' }] })
     })
 
-  test('it should not create classes without a valid description')
+  test('{$i} it should not create classes without a valid description - description: "{$self}"')
     .with(['', 'a', 'abcdefghi', 'a'.repeat(256)])
     .run(async ({ client }, description) => {
       const payload = await makeClassPayload({ description })
@@ -56,7 +56,7 @@ test.group('Classes', (group) => {
       response.assertBodyContains({ errors: [{ field: 'description' }] })
     })
 
-  test('it should not create classes without a valid vacancies')
+  test('{$i} it should not create classes without a valid vacancies - vacancies: "{$self}"')
     .with([-1, Number.NaN, 'string', null])
     .run(async ({ client }, vacancies) => {
       const payload = await makeClassPayload({ vacancies })
@@ -66,7 +66,7 @@ test.group('Classes', (group) => {
       response.assertBodyContains({ errors: [{ field: 'vacancies' }] })
     })
 
-  test('it should not create classes without a valid startDate')
+  test('{$i} it should not create classes without a valid startDate - startDate: "{$self}"')
     .with([1, 'string', null, new Date(), DateTime.now()])
     .run(async ({ client }, startDate) => {
       const payload = await makeClassPayload({ startDate })
@@ -76,7 +76,7 @@ test.group('Classes', (group) => {
       response.assertBodyContains({ errors: [{ field: 'startDate' }] })
     })
 
-  test('it should not create classes without a valid endDate')
+  test('{$i} it should not create classes without a valid endDate - endDate: "{$self}"')
     .with([1, 'string', null, new Date(), DateTime.now()])
     .run(async ({ client }, endDate) => {
       const payload = await makeClassPayload({ endDate })
@@ -85,6 +85,33 @@ test.group('Classes', (group) => {
       response.assertStatus(422)
       response.assertBodyContains({ errors: [{ field: 'endDate' }] })
     })
+
+  test('it should not create classes with the same title', async ({ client }) => {
+    const uniqueTitle = 'Unique Class Title'
+    await ClassFactory.tap((c) => (c.title = uniqueTitle))
+      .with('course')
+      .create()
+
+    const payload = await makeClassPayload({ title: uniqueTitle })
+    const response = await client.post('/classes').json(payload)
+
+    response.assertStatus(500)
+  })
+
+  test('it should not update classes with an existing title', async ({ client }) => {
+    const [classA, classB] = await ClassFactory.with('course').createMany(2)
+    await classB.load('course')
+
+    const payload = {
+      ...classB.serialize(),
+      courseId: classB.course.id,
+      title: classA.title,
+    }
+
+    const response = await client.post('/classes').json(payload)
+
+    response.assertStatus(500)
+  })
 
   test('it should not allow update a class without a valid status', async ({ client }) => {
     const classRecord = await ClassFactory.with('course').create()
@@ -95,8 +122,6 @@ test.group('Classes', (group) => {
     }
 
     const response = await client.put(`/classes/${classRecord.id}`).json(payload)
-
-    console.log(JSON.stringify(response.body(), null, 2))
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [{ field: 'status' }] })

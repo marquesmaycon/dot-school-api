@@ -6,10 +6,7 @@ import vine from '@vinejs/vine'
  */
 export const createThemeValidator = vine.compile(
   vine.object({
-    title: vine.string().minLength(3).maxLength(255).unique({
-      table: 'themes',
-      column: 'title',
-    }),
+    title: vine.string().minLength(3).maxLength(255),
   })
 )
 
@@ -19,9 +16,6 @@ export const createThemeValidator = vine.compile(
  */
 export const updateThemeValidator = vine.compile(
   vine.object({
-    title: vine.string().minLength(3).maxLength(255).unique({
-      table: 'themes',
-      column: 'title',
-    }),
+    title: vine.string().minLength(3).maxLength(255),
   })
 )
