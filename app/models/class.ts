@@ -4,6 +4,7 @@ import { DateTime } from 'luxon'
 
 import Course from './course.js'
 import User from './user.js'
+import type { ClassStatus } from '../enums/class_status.js'
 
 export default class Class extends BaseModel {
   @column({ isPrimary: true })
@@ -19,7 +20,7 @@ export default class Class extends BaseModel {
   declare vacancies: number
 
   @column()
-  declare status: string
+  declare status: ClassStatus
 
   @column.date()
   declare startDate: DateTime

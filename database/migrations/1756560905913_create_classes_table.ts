@@ -1,4 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
+import { ClassStatus } from '../../app/enums/class_status.js'
 
 export default class extends BaseSchema {
   protected tableName = 'classes'
@@ -10,7 +11,10 @@ export default class extends BaseSchema {
       table.string('title').notNullable()
       table.string('description').notNullable()
       table.integer('vacancies').notNullable()
-      table.string('status').notNullable()
+      table
+        .enum('status', Object.values(ClassStatus))
+        .notNullable()
+        .defaultTo(ClassStatus.AVAILABLE)
       table.date('start_date').notNullable()
       table.date('end_date').notNullable()
       table.integer('course_id').references('courses.id').onDelete('SET NULL').notNullable()

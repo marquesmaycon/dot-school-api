@@ -1,5 +1,7 @@
-import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
+
+import User from '#models/user'
+import { createUserValidator, updateUserValidator } from '#validators/user'
 
 export default class UsersController {
   /**
@@ -7,6 +9,7 @@ export default class UsersController {
    */
   async index({ response }: HttpContext) {
     const users = await User.all()
+
     return response.ok(users)
   }
 
@@ -14,8 +17,10 @@ export default class UsersController {
    * Handle form submission for the create action
    */
   async store({ request, response }: HttpContext) {
-    const body = request.body()
+    const body = await request.validateUsing(createUserValidator)
+
     const user = await User.create(body)
+
     return response.created(user)
   }
 
@@ -24,6 +29,7 @@ export default class UsersController {
    */
   async show({ params, response }: HttpContext) {
     const user = await User.findOrFail(params.id)
+
     return response.ok(user)
   }
 
@@ -31,8 +37,11 @@ export default class UsersController {
    * Handle form submission for the edit action
    */
   async update({ params, request, response }: HttpContext) {
+    const body = await request.validateUsing(updateUserValidator)
+
     const user = await User.findOrFail(params.id)
-    await user.merge(request.body()).save()
+    await user.merge(body).save()
+
     return response.ok(user)
   }
 
@@ -41,7 +50,9 @@ export default class UsersController {
    */
   async destroy({ params, response }: HttpContext) {
     const user = await User.findOrFail(params.id)
+
     await user.delete()
+
     return response.noContent()
   }
 }
