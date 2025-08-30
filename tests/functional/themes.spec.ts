@@ -18,6 +18,7 @@ test.group('Themes', (group) => {
       const response = await client.post('/themes').json(title)
 
       response.assertStatus(422)
+      response.assertBodyContains({ errors: [{ field: 'title' }] })
     })
 
   test('it should not create themes with the same title', async ({ client }) => {
@@ -27,5 +28,6 @@ test.group('Themes', (group) => {
     const response = await client.post('/themes').json({ title: themeTitle })
 
     response.assertStatus(422)
+    response.assertBodyContains({ errors: [{ field: 'title', rule: 'database.unique' }] })
   })
 })
