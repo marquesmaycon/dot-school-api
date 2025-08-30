@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 import Course from '#models/course'
 import { createCourseValidator, updateCourseValidator } from '#validators/course'
+import { ClassStatus } from '#enums/class_status'
 
 export default class CoursesController {
   /**
@@ -9,6 +10,20 @@ export default class CoursesController {
    */
   async index({ response }: HttpContext) {
     const courses = await Course.all()
+
+    return response.ok(courses)
+  }
+
+  async availableCourses({ response, request }: HttpContext) {
+    const { title, themes = [] } = request.qs() as { title?: string; themes?: number[] }
+
+    const courses = await Course.query()
+      .if(title, (query) => query.where('title', 'like', `%${title}%`))
+      .if(themes.length > 0, (query) =>
+        query.whereHas('themes', (q) => q.whereIn('themes.id', themes))
+      )
+      .whereHas('classes', (query) => query.where('status', ClassStatus.AVAILABLE))
+      .preload('classes')
 
     return response.ok(courses)
   }

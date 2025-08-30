@@ -14,6 +14,12 @@ const CoursesController = () => import('#controllers/courses_controller')
 const ClassesController = () => import('#controllers/classes_controller')
 const ThemesController = () => import('#controllers/themes_controller')
 
+router
+  .group(() => {
+    router.get('/available', [CoursesController, 'availableCourses'])
+  })
+  .prefix('courses')
+
 router.resource('users', UsersController).apiOnly()
 router.resource('courses', CoursesController).apiOnly()
 router.resource('classes', ClassesController).apiOnly()
