@@ -29,6 +29,9 @@ export default class Class extends BaseModel {
   @column.date()
   declare endDate: DateTime
 
+  @column()
+  declare courseId: string
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
