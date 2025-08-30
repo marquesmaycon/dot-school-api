@@ -13,6 +13,7 @@ export default class extends BaseSchema {
       table.string('status').notNullable()
       table.date('start_date').notNullable()
       table.date('end_date').notNullable()
+      table.integer('course_id').references('courses.id').onDelete('SET NULL').notNullable()
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

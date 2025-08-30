@@ -1,5 +1,9 @@
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+
+import Class from './class.js'
+import Theme from './theme.js'
 
 export default class Course extends BaseModel {
   @column({ isPrimary: true })
@@ -19,4 +23,10 @@ export default class Course extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  @hasMany(() => Class)
+  declare classes: HasMany<typeof Class>
+
+  @manyToMany(() => Theme)
+  declare themes: ManyToMany<typeof Theme>
 }
