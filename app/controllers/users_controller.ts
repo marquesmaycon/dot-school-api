@@ -13,6 +13,14 @@ export default class UsersController {
     return response.ok(users)
   }
 
+  async courses({ params, response }: HttpContext) {
+    const user = await User.findOrFail(params.id)
+
+    await user.load('classes', (query) => query.preload('course'))
+
+    return response.ok(user.classes.map((cls) => cls.course))
+  }
+
   /**
    * Handle form submission for the create action
    */

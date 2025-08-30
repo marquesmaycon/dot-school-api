@@ -20,6 +20,18 @@ router
   })
   .prefix('courses')
 
+router
+  .group(() => {
+    router.post('/:classId/users', [ClassesController, 'assignUser'])
+  })
+  .prefix('classes')
+
+router
+  .group(() => {
+    router.get('/:id/courses', [UsersController, 'courses'])
+  })
+  .prefix('users')
+
 router.resource('users', UsersController).apiOnly()
 router.resource('courses', CoursesController).apiOnly()
 router.resource('classes', ClassesController).apiOnly()

@@ -1,6 +1,9 @@
 import type { HttpContext } from '@adonisjs/core/http'
+import { DateTime } from 'luxon'
 
 import Class from '#models/class'
+import User from '#models/user'
+import { ClassStatus } from '#enums/class_status'
 import { createClassValidator, updateClassValidator } from '#validators/class'
 
 export default class ClassesController {
@@ -22,6 +25,40 @@ export default class ClassesController {
     const classRecord = await Class.create(body)
 
     return response.created(classRecord)
+  }
+
+  async assignUser({ params, request, response }: HttpContext) {
+    const { classId } = params
+    const { userId } = request.body()
+
+    const user = await User.findOrFail(userId)
+    const classRecord = await Class.findOrFail(classId)
+
+    await classRecord.load('course', (query) =>
+      query.preload('classes', (qry) => qry.preload('users'))
+    )
+
+    const courseClasses = classRecord.course.classes
+
+    const userAlreadyAssigned = courseClasses.some((cls) => cls.users.some((u) => u.id === user.id))
+
+    if (userAlreadyAssigned) {
+      return response.badRequest({ message: 'User is already assigned to a class in this course' })
+    }
+
+    if (classRecord.status === ClassStatus.FINISHED) {
+      return response.badRequest({ message: 'Cannot assign user to a finished class' })
+    }
+
+    const today = DateTime.now()
+    if (today < classRecord.startDate || today > classRecord.endDate) {
+      return response.badRequest({ message: 'Cannot assign user to class outside of its schedule' })
+    }
+
+    await classRecord.related('users').attach([user.id])
+    await classRecord.load('users')
+
+    return response.ok(classRecord)
   }
 
   /**
