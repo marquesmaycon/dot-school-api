@@ -29,9 +29,10 @@ export default class ClassesController {
 
   async assignUser({ params, request, response }: HttpContext) {
     const { classId } = params
-    const { userId } = request.body()
+    const { email } = request.body()
 
-    const user = await User.findOrFail(userId)
+    const user = await User.findByOrFail('email', email)
+
     const classRecord = await Class.findOrFail(classId)
 
     await classRecord.load('course', (query) =>

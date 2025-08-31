@@ -13,16 +13,27 @@ export default class UsersController {
     return response.ok(users)
   }
 
-  async courses({ params, response }: HttpContext) {
-    const user = await User.findOrFail(params.id)
+  async courses({ request, response }: HttpContext) {
+    const { search } = request.qs()
+    const users = await User.query()
+      .select('id', 'name', 'email')
+      .if(search, (query) =>
+        query.where((q) => {
+          if (search) {
+            q.where('name', 'like', `%${search}%`).orWhere('email', 'like', `%${search}%`)
+          }
+        })
+      )
+      .whereHas('classes', (query) => query.select('id', 'title', 'courseId'))
+      .preload('classes', (query) =>
+        query.select('id', 'title', 'courseId').preload('course', (qr) => qr.select('id', 'title'))
+      )
 
-    await user.load('classes', (query) => query.preload('course'))
-
-    return response.ok(user.classes.map((cls) => cls.course))
+    return response.ok(users)
   }
 
   /**
-   * Handle form submission for the create action
+   * Handle form submission for the create action'
    */
   async store({ request, response }: HttpContext) {
     const body = await request.validateUsing(createUserValidator)

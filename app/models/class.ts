@@ -43,4 +43,6 @@ export default class Class extends BaseModel {
 
   @manyToMany(() => User)
   declare users: ManyToMany<typeof User>
+
+  serializeExtras = true
 }

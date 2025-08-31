@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import type { HttpContext } from '@adonisjs/core/http'
 
 import Course from '#models/course'
@@ -23,7 +24,14 @@ export default class CoursesController {
         query.whereHas('themes', (q) => q.whereIn('themes.id', themes))
       )
       .whereHas('classes', (query) => query.where('status', ClassStatus.AVAILABLE))
-      .preload('classes')
+      .preload('classes', (query) =>
+        query
+          .where('status', ClassStatus.AVAILABLE)
+          .andWhere('startDate', '<=', DateTime.now().toISODate())
+          .andWhere('endDate', '>', DateTime.now().toISODate())
+          .withCount('users')
+      )
+      .preload('themes', (q) => q.select('id', 'title'))
 
     return response.ok(courses)
   }

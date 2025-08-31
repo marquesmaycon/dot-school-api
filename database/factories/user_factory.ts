@@ -8,7 +8,7 @@ export const UserFactory = factory
   .define(User, async ({ faker }) => {
     return {
       name: faker.person.fullName(),
-      email: faker.internet.email(),
+      email: faker.internet.email().toLowerCase(),
     }
   })
   .relation('classes', () => ClassFactory)

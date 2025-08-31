@@ -30,7 +30,7 @@ router
 
     router
       .group(() => {
-        router.get('/:id/courses', [UsersController, 'courses'])
+        router.get('/courses', [UsersController, 'courses'])
       })
       .prefix('users')
 
