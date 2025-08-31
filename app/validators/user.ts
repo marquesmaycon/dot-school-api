@@ -1,4 +1,4 @@
-import vine from '@vinejs/vine'
+import vine, { SimpleMessagesProvider } from '@vinejs/vine'
 
 /**
  * Validator to validate the payload when creating
@@ -24,3 +24,7 @@ export const updateUserValidator = vine.compile(
     email: vine.string().email().maxLength(255),
   })
 )
+
+createUserValidator.messagesProvider = new SimpleMessagesProvider({
+  'email.database.unique': 'Já existe um usuário cadastrado com esse email',
+})

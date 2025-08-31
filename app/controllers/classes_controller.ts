@@ -44,16 +44,20 @@ export default class ClassesController {
     const userAlreadyAssigned = courseClasses.some((cls) => cls.users.some((u) => u.id === user.id))
 
     if (userAlreadyAssigned) {
-      return response.badRequest({ message: 'User is already assigned to a class in this course' })
+      return response.badRequest({ message: 'Usuário já está matriculado nesse curso' })
     }
 
     if (classRecord.status === ClassStatus.FINISHED) {
-      return response.badRequest({ message: 'Cannot assign user to a finished class' })
+      return response.badRequest({
+        message: 'Não é possível matricular usuário em uma aula finalizada',
+      })
     }
 
     const today = DateTime.now()
     if (today < classRecord.startDate || today > classRecord.endDate) {
-      return response.badRequest({ message: 'Cannot assign user to class outside of its schedule' })
+      return response.badRequest({
+        message: 'Não é possível matricular usuário em uma aula fora do seu período',
+      })
     }
 
     await classRecord.related('users').attach([user.id])
