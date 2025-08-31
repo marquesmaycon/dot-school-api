@@ -10,7 +10,7 @@ export const CourseFactory = factory
     return {
       title: faker.commerce.department(),
       description: faker.lorem.paragraph(),
-      imgUrl: faker.image.urlLoremFlickr({ category: 'education', width: 640, height: 480 }),
+      imgUrl: faker.image.urlPicsumPhotos(),
     }
   })
   .relation('classes', () => ClassFactory)

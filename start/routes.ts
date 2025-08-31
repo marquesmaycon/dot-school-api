@@ -16,23 +16,27 @@ const ThemesController = () => import('#controllers/themes_controller')
 
 router
   .group(() => {
-    router.get('/available', [CoursesController, 'availableCourses'])
-  })
-  .prefix('courses')
+    router
+      .group(() => {
+        router.get('/available', [CoursesController, 'availableCourses'])
+      })
+      .prefix('courses')
 
-router
-  .group(() => {
-    router.post('/:classId/users', [ClassesController, 'assignUser'])
-  })
-  .prefix('classes')
+    router
+      .group(() => {
+        router.post('/:classId/users', [ClassesController, 'assignUser'])
+      })
+      .prefix('classes')
 
-router
-  .group(() => {
-    router.get('/:id/courses', [UsersController, 'courses'])
-  })
-  .prefix('users')
+    router
+      .group(() => {
+        router.get('/:id/courses', [UsersController, 'courses'])
+      })
+      .prefix('users')
 
-router.resource('users', UsersController).apiOnly()
-router.resource('courses', CoursesController).apiOnly()
-router.resource('classes', ClassesController).apiOnly()
-router.resource('themes', ThemesController).apiOnly()
+    router.resource('users', UsersController).apiOnly()
+    router.resource('courses', CoursesController).apiOnly()
+    router.resource('classes', ClassesController).apiOnly()
+    router.resource('themes', ThemesController).apiOnly()
+  })
+  .prefix('api')

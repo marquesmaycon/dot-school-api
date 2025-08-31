@@ -8,8 +8,14 @@ import { UserFactory } from '#database/factories/user_factory'
 
 export default class extends BaseSeeder {
   async run() {
-    const users = await UserFactory.createMany(100)
-    const themes = await ThemeFactory.createMany(15)
+    const users = await UserFactory.createMany(50)
+    const themes = await ThemeFactory.merge([
+      { title: 'Inovação' },
+      { title: 'Tecnologia' },
+      { title: 'Marketing' },
+      { title: 'Empreendedorismo' },
+      { title: 'Agro' },
+    ]).createMany(5)
     const courses = await CourseFactory.with('classes', 2)
       .with('classes', 1, (builder) => builder.apply('done'))
       .createMany(5)
