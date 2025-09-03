@@ -1,9 +1,11 @@
 import db from '@adonisjs/lucid/services/db'
 import { test } from '@japa/runner'
 
+import { DateTime } from 'luxon'
+
 import { CourseFactory } from '#database/factories/course_factory'
 import { ClassFactory } from '#database/factories/class_factory'
-import { DateTime } from 'luxon'
+import { UserFactory } from '#database/factories/user_factory'
 
 const makeClassPayload = async (overrides = {}) => {
   const course = await CourseFactory.create()
@@ -14,8 +16,6 @@ const makeClassPayload = async (overrides = {}) => {
     ...overrides,
   }
 }
-
-// TO DO => testar endpoint assignUser
 
 test.group('Classes', (group) => {
   group.each.setup(async () => {
@@ -125,5 +125,49 @@ test.group('Classes', (group) => {
 
     response.assertStatus(422)
     response.assertBodyContains({ errors: [{ field: 'status' }] })
+  })
+
+  test('it should allow assign a user to a class from a new course', async ({ client }) => {
+    const classRecord = await ClassFactory.with('course').create()
+    const user = await UserFactory.create()
+
+    const payload = { email: user.email }
+
+    const response = await client.post(`/classes/${classRecord.id}/users`).json(payload)
+
+    response.assertOk()
+    response.assertBodyContains({ users: [{ email: user.email }] })
+  })
+
+  test('it should not allow assign a user to a class from the same course', async ({ client }) => {
+    const course = await CourseFactory.with('classes', 2).create()
+    const [classA, classB] = course.classes
+
+    const user = await UserFactory.create()
+    await classA.related('users').attach([user.id])
+
+    const payload = { email: user.email }
+
+    const response = await client.post(`/classes/${classB.id}/users`).json(payload)
+
+    response.assertBadRequest()
+  })
+
+  test('it should not allow assign a user to a class finished or out of date', async ({
+    client,
+  }) => {
+    const course = await CourseFactory.with('classes', 1, (c) => c.apply('finished'))
+      .with('classes', 1, (c) => c.apply('notStarted'))
+      .create()
+    const [classA, classB] = course.classes
+
+    const user = await UserFactory.create()
+    const payload = { email: user.email }
+
+    const responseA = await client.post(`/classes/${classA.id}/users`).json(payload)
+    const responseB = await client.post(`/classes/${classB.id}/users`).json(payload)
+
+    responseA.assertBadRequest()
+    responseB.assertBadRequest()
   })
 })

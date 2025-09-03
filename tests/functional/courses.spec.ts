@@ -3,6 +3,8 @@ import { test } from '@japa/runner'
 
 import { ThemeFactory } from '#database/factories/theme_factory'
 import { CourseFactory } from '#database/factories/course_factory'
+import Course from '#models/course'
+import { ClassStatus } from '#enums/class_status'
 
 const makeCoursesPayload = async (overrides = {}) => {
   const theme = await ThemeFactory.create()
@@ -23,8 +25,6 @@ test.group('Courses', (group) => {
   group.each.teardown(async () => {
     await db.rollbackGlobalTransaction()
   })
-
-  // TO DO => testar endpoint availableCourses
 
   test('it should create courses with valid data', async ({ client }) => {
     const theme = await ThemeFactory.create()
@@ -118,5 +118,27 @@ test.group('Courses', (group) => {
     const response = await client.post('/courses').json(payload)
 
     response.assertStatus(500)
+  })
+
+  test('it should not show courses with a finished or out of date classes', async ({
+    assert,
+    client,
+  }) => {
+    await CourseFactory.with('classes', 1)
+      .with('classes', 1, (q) => q.apply('done'))
+      .with('classes', 1, (q) => q.apply('finished'))
+      .create()
+
+    const response = await client.get('/courses/available')
+
+    response.assertOk()
+    response.assertBodyContains([{ classes: [{ status: ClassStatus.AVAILABLE }] }])
+    response.assertBodyNotContains([{ classes: [{ status: ClassStatus.FINISHED }] }])
+
+    const body: Course[] = response.body()
+
+    body.forEach((course) => {
+      assert.lengthOf(course.classes, 1)
+    })
   })
 })
