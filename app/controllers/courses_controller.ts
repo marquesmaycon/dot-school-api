@@ -15,7 +15,7 @@ export default class CoursesController {
     return response.ok(courses)
   }
 
-  async availableCourses({ response, request }: HttpContext) {
+  async available({ response, request }: HttpContext) {
     const { title, themes = [] } = request.qs() as { title?: string; themes?: number[] }
 
     const courses = await Course.query()

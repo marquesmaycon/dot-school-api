@@ -18,7 +18,7 @@ router
   .group(() => {
     router
       .group(() => {
-        router.get('/available', [CoursesController, 'availableCourses'])
+        router.get('/available', [CoursesController, 'available'])
       })
       .prefix('courses')
 
