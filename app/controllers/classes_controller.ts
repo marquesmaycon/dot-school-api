@@ -31,7 +31,11 @@ export default class ClassesController {
     const { classId } = params
     const { email } = request.body()
 
-    const user = await User.findByOrFail('email', email)
+    const user = await User.findBy('email', email)
+
+    if (!user) {
+      return response.badRequest({ message: 'Usuário não encontrado' })
+    }
 
     const classRecord = await Class.findOrFail(classId)
 
