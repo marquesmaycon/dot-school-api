@@ -20,17 +20,13 @@ Arquivo .env com variáveis iniciais já estará incluso
 npm install
 ```
 
-### 4. Execute as migrações do banco de dados:
+### 4. Inicie o banco de dados:
 
 ```bash
-node ace migration:run
+npm run db:init
 ```
 
-### 5. (Recomendado para a demonstração) Execute os seeders para popular o banco com dados de exemplo:
-
-```bash
-node ace db:seed
-```
+Aqui estamos criando a pasta `/tmp` para o arquivo do SQLite, executando as migrations `node ace migration:run` e populando o banco de dados `node ace db:seed`
 
 ### Executando a aplicação
 
