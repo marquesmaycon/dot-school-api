@@ -12,6 +12,7 @@ Uma API REST desenvolvida com AdonisJS para gerenciamento de cursos, turmas, usu
 ### Instalação
 
 ### 1. Descompacte o arquivo Zip
+Arquivo .env com variáveis iniciais já estará incluso
 
 ### 2. Instale as dependências
 
